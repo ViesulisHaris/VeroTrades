@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, X, Home, PlusCircle, BarChart3 } from 'lucide-react';
+import { Menu, X, Home, PlusCircle, BarChart3, Calendar, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -16,18 +16,21 @@ export default function Sidebar({ onLogout }: Props) {
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/log-trade', label: 'Log Trade', icon: PlusCircle },
+    { href: '/calendar', label: 'Calendar', icon: Calendar },
     { href: '/strategies', label: 'Strategies', icon: BarChart3 },
   ];
 
   return (
     <>
+      {/* Mobile toggle */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded bg-primary text-white lg:hidden"
+        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-metallic-silver/20 text-metallic-silver lg:hidden"
       >
         <Menu className="w-5 h-5" />
       </button>
 
+      {/* Overlay */}
       {open && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -35,20 +38,19 @@ export default function Sidebar({ onLogout }: Props) {
         />
       )}
 
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-metallic-bg/80 backdrop-blur-md border-r border-metallic-dark/50 shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
-          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">
-            Menu
-          </h2>
+        <div className="flex items-center justify-between p-4 border-b border-metallic-dark/50">
+          <h2 className="text-lg font-bold text-metallic-silver">VeroTrade</h2>
           <button
             onClick={() => setOpen(false)}
-            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
+            className="p-1 rounded-full hover:bg-metallic-dark/20 lg:hidden"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-metallic-silver" />
           </button>
         </div>
 
@@ -57,10 +59,10 @@ export default function Sidebar({ onLogout }: Props) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              className={`glass flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 pathname.startsWith(href)
-                  ? 'bg-primary text-white'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-primary/20 text-primary border-primary/50'
+                  : 'text-metallic-light hover:bg-metallic-dark/20 hover:text-primary'
               }`}
               onClick={() => setOpen(false)}
             >
@@ -70,11 +72,9 @@ export default function Sidebar({ onLogout }: Props) {
           ))}
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+            className="glass w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-red-400 hover:bg-red-500/10"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m4 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h2a3 3 0 013 3v1" />
-            </svg>
+            <LogOut className="w-5 h-5" />
             Logout
           </button>
         </nav>
