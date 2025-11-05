@@ -6,8 +6,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#6366f1',
-        secondary: '#8b5cf6',
+        metallic: {
+          silver: '#C0C0C0',
+          dark: '#A8A8A8',
+          light: '#E5E5E5',
+          bg: '#1a1a1a',  // Dark metallic bg
+        },
+        primary: '#C0C0C0',  // Silver primary
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },
