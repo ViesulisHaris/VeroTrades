@@ -1,6 +1,6 @@
 'use client';
 
-import './globals.css';          // <-- ADD THIS LINE
+import './globals.css';
 import { Inter } from 'next/font/google';
 import Sidebar from '@/components/Sidebar';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -46,19 +46,18 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} flex h-full bg-gray-50 dark:bg-gray-900`}>
+      <body className={`${inter.className} flex h-full bg-metallic-bg`}>
         {user && <Sidebar onLogout={handleLogout} />}
         <div className="flex-1 flex flex-col">
-          <header className="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-              VeroTrade
-            </h1>
+          {/* METALLIC HEADER */}
+          <header className="glass shadow-xl p-4 flex justify-between items-center border-b border-metallic-dark/50">
+            <h1 className="text-xl font-bold text-metallic-silver">VeroTrade</h1>
             <div className="flex items-center gap-3">
               <ThemeToggle />
               {user && (
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1 text-sm rounded bg-primary text-white hover:bg-primary/90"
+                  className="px-4 py-2 bg-red-500/20 text-red-300 rounded-xl hover:bg-red-500/30 transition"
                 >
                   Logout
                 </button>
