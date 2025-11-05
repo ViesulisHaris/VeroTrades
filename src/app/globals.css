@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: smooth scroll */
+@layer components {
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl;
+  }
+  .metallic-input {
+    @apply bg-white/5 border border-metallic-dark/50 text-metallic-light placeholder-metallic-dark/70 focus:border-primary focus:ring-primary rounded-lg px-4 py-2 transition-all;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }
