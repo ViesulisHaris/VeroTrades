@@ -1,21 +1,33 @@
 import DashboardCard from '@/components/DashboardCard';
-import EmotionRadar from '@/components/EmotionRadar';  // Updated to Radar
+import EmotionRadar from '@/components/EmotionRadar';
 import { supabase } from '../../../supabase/client';
 import { formatCurrency } from '@/lib/utils';
 
+interface Trade {
+  id: string;
+  pnl: number | null;
+  emotional_state: string | null;
+  user_id: string;
+}
+
+/* -------------------------------------------------
+   Helper – fetch stats for a given userId
+   ------------------------------------------------- */
 async function getStats(userId: string) {
   const { data: trades } = await supabase
     .from('trades')
     .select('*')
     .eq('user_id', userId);
 
-  const safeTrades = trades ?? [];
+  const safeTrades: Trade[] = (trades ?? []) as Trade[];
 
-  const totalPnL = safeTrades.reduce((s, t) => s + (t.pnl || 0), 0);
-  const wins = safeTrades.filter(t => (t.pnl ?? 0) > 0).length;
+  // ---- PnL & winrate ----
+  const totalPnL = safeTrades.reduce((s, t) => s + (t.pnl ?? 0), 0);
+  const wins = safeTrades.filter((t) => (t.pnl ?? 0) > 0).length;
   const total = safeTrades.length;
   const winrate = total ? ((wins / total) * 100).toFixed(1) : '0';
 
+  // ---- Profit factor ----
   const grossProfit = safeTrades.reduce((s, t) => s + Math.max(0, t.pnl ?? 0), 0);
   const grossLoss = safeTrades.reduce((s, t) => s + Math.min(0, t.pnl ?? 0), 0);
   const profitFactor =
@@ -25,44 +37,65 @@ async function getStats(userId: string) {
         : '0'
       : (grossProfit / Math.abs(grossLoss)).toFixed(2);
 
-  const emotions = safeTrades.reduce((acc: Record<string, number>, t) => {
-    const e = t.emotional_state || 'Neutral';
-    acc[e] = (acc[e] || 0) + 1;
+  // ---- Emotions (radar) ----
+  const emotions = safeTrades.reduce<Record<string, number>>((acc, t) => {
+    const e = t.emotional_state ?? 'Neutral';
+    acc[e] = (acc[e] ?? 0) + 1;
     return acc;
   }, {});
 
-  const totalEmotions = Object.values(emotions).reduce((a: number, b: number) => a + b, 0) || 1;
+  const totalEmotions =
+    Object.values(emotions).reduce((a: number, b: number) => a + b, 0) || 1;
 
+  // ---- Total trades count (separate call – avoids type issues) ----
   const { count: totalTrades } = await supabase
     .from('trades')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
 
-  return { totalPnL, winrate, profitFactor, emotions, totalEmotions, totalTrades: totalTrades ?? 0 };
+  return {
+    totalPnL,
+    winrate,
+    profitFactor,
+    emotions,
+    totalEmotions,
+    totalTrades: totalTrades ?? 0,
+  };
 }
 
+/* -------------------------------------------------
+   Dashboard page – server component
+   ------------------------------------------------- */
 export default async function DashboardPage() {
+  // Get the logged‑in user
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  const { totalPnL, winrate, profitFactor, emotions, totalEmotions, totalTrades } = await getStats(user.id);
+  if (!user) return null; // will redirect to login via layout
 
-  const emotionData = Object.entries(emotions).map(([label]) => {
-    const value = emotions[label as keyof typeof emotions] || 0;
-    return {
-      subject: label,
-      value: (value / totalEmotions * 10),  // Scale to 0-10 for radar
-      fullMark: 10,
-      percent: ((value / totalEmotions) * 100).toFixed(1) + '%',
-    };
-  });
+  const {
+    totalPnL,
+    winrate,
+    profitFactor,
+    emotions,
+    totalEmotions,
+    totalTrades,
+  } = await getStats(user.id);
+
+  // Prepare radar data (0‑10 scale)
+  const emotionData = Object.entries(emotions).map(([label, value]) => ({
+    subject: label,
+    value: (value / totalEmotions) * 10,
+    fullMark: 10,
+    percent: ((value / totalEmotions) * 100).toFixed(1) + '%',
+  }));
 
   return (
     <div className="space-y-8 p-6">
       <h2 className="text-3xl font-bold text-metallic-silver">Dashboard</h2>
 
+      {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <DashboardCard title="Total PnL" value={formatCurrency(totalPnL)} />
         <DashboardCard title="Winrate" value={`${winrate}%`} />
@@ -70,9 +103,12 @@ export default async function DashboardPage() {
         <DashboardCard title="Total Trades" value={totalTrades.toString()} />
       </div>
 
+      {/* Radar chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass p-6">
-          <h3 className="text-lg font-semibold mb-4 text-metallic-silver">Emotional State Radar</h3>
+          <h3 className="text-lg font-semibold mb-4 text-metallic-silver">
+            Emotional State Radar
+          </h3>
           <EmotionRadar data={emotionData} />
         </div>
       </div>
