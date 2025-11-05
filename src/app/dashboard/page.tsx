@@ -25,13 +25,13 @@ async function getStats(userId: string) {
         : '0'
       : (grossProfit / Math.abs(grossLoss)).toFixed(2);
 
-  const emotions = safeTrades.reduce((acc, t) => {
+  const emotions = safeTrades.reduce((acc: Record<string, number>, t) => {
     const e = t.emotional_state || 'Neutral';
     acc[e] = (acc[e] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const totalEmotions = Object.values(emotions).reduce((a, b) => a + b, 0) || 1;
+  const totalEmotions = Object.values(emotions).reduce((a: number, b: number) => a + b, 0) || 1;
 
   return { totalPnL, winrate, profitFactor, emotions, totalEmotions };
 }
