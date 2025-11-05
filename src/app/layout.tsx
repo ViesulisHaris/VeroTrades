@@ -1,6 +1,6 @@
 'use client';
 
-import './globals.css';
+import './globals.css';          // <-- ADD THIS LINE
 import { Inter } from 'next/font/google';
 import Sidebar from '@/components/Sidebar';
 import ThemeToggle from '@/components/ThemeToggle';
